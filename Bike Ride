@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RIDE OR NOTHING</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #f5f5f4; overflow-x: hidden; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #78716c, #57534e); border-radius: 3px; }
+
+    /* Glass */
+    .glass {
+      background: rgba(23, 23, 23, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Grid Pattern */
+    .grid-pattern {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* Text Gradient */
+    .text-gradient {
+      background: linear-gradient(135deg, #d6d3d1 0%, #a8a29e 50%, #78716c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .text-gradient-warm {
+      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 50%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .text-gradient-fire {
+      background: linear-gradient(135deg, #fff 0%, #fcd34d 40%, #f97316 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-20px) rotate(2deg); }
+      50% { transform: translateY(-10px) rotate(0deg); }
+      75% { transform: translateY(-25px) rotate(-2deg); }
+    }
+    @keyframes morph {
+      0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+      50% { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    @keyframes rotate-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes rotate-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+    @keyframes dash-move {
+      to { stroke-dashoffset: -100; }
+    }
+    @keyframes speed-line {
+      0% { transform: translateX(100vw); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(-100vw); opacity: 0; }
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(60px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes counter-pulse {
+      0%, 100% { text-shadow: 0 0 20px rgba(245,158,11,0.3); }
+      50% { text-shadow: 0 0 60px rgba(245,158,11,0.6), 0 0 100px rgba(245,158,11,0.2); }
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.15); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.1); }
+    }
+    @keyframes wheel-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes breathe {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes road-dash {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(40px); }
+    }
+    @keyframes typewriter {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    @keyframes blink-caret {
+      from, to { border-color: transparent; }
+      50% { border-color: #f59e0b; }
+    }
+    @keyframes zoom-pulse {
+      0%, 100% { transform: scale(1.05); }
+      50% { transform: scale(1.15); }
+    }
+
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .animate-morph { animation: morph 15s ease-in-out infinite; }
+    .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+    .animate-rotate-slow { animation: rotate-slow 30s linear infinite; }
+    .animate-rotate-reverse { animation: rotate-reverse 25s linear infinite; }
+    .animate-heartbeat { animation: heartbeat 2s ease-in-out infinite; }
+    .animate-breathe { animation: breathe 5s ease-in-out infinite; }
+    .animate-zoom-pulse { animation: zoom-pulse 10s ease-in-out infinite; }
+
+    /* Reveal on scroll */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: all 1s cubic-bezier(0.17, 0.55, 0.55, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-scale {
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 1s cubic-bezier(0.17, 0.55, 0.55, 1);
+    }
+    .reveal-scale.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
+    .stagger-4 { transition-delay: 0.4s; }
+    .stagger-5 { transition-delay: 0.5s; }
+    .stagger-6 { transition-delay: 0.6s; }
+
+    /* Speed lines */
+    .speed-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(245,158,11,0.5), transparent);
+      animation: speed-line linear infinite;
+    }
+
+    /* Quote card hover */
+    .quote-card {
+      transition: all 0.5s cubic-bezier(0.17, 0.55, 0.55, 1);
+    }
+    .quote-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    /* CTA shimmer */
+    .btn-shimmer {
+      background-size: 200% auto;
+      animation: shimmer 3s linear infinite;
+    }
+
+    /* Road animation in hero */
+    .road-line {
+      width: 4px;
+      height: 20px;
+      background: rgba(245,158,11,0.4);
+      border-radius: 2px;
+      animation: road-dash 0.5s linear infinite;
+    }
+
+    /* Stat counter */
+    .stat-number {
+      animation: counter-pulse 3s ease-in-out infinite;
+    }
+
+    /* Wheel SVG */
+    .wheel-spin {
+      animation: wheel-spin 2s linear infinite;
+    }
+    .wheel-spin-slow {
+      animation: wheel-spin 4s linear infinite;
+    }
+
+    /* Particles */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(245,158,11,0.6);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Hero parallax text */
+    .hero-title {
+      line-height: 0.85;
+      letter-spacing: -0.06em;
+    }
+
+    /* Noise overlay */
+    .noise::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Vertical text */
+    .vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    /* Progress ring */
+    .progress-ring-circle {
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.17, 0.55, 0.55, 1);
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    /* Typewriter */
+    .typewriter-text {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid #f59e0b;
+      animation: typewriter 3s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
+    }
+
+    /* Image mask */
+    .img-mask {
+      mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    }
+  </style>
+</head>
+<body class="noise">
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="fixed top-0 left-0 right-0 z-50 py-4 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="glass rounded-2xl px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <span class="iconify text-white text-xl" data-icon="mdi:bike-fast"></span>
+          </div>
+          <span class="font-bold text-lg tracking-tight">RIDESTR</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#stats" class="text-sm text-stone-400 hover:text-stone-200 transition-colors duration-300">Stats</a>
+          <a href="#quotes" class="text-sm text-stone-400 hover:text-stone-200 transition-colors duration-300">Fuel</a>
+          <a href="#mantra" class="text-sm text-stone-400 hover:text-stone-200 transition-colors duration-300">Mantra</a>
+          <a href="#ride" class="text-sm text-stone-400 hover:text-stone-200 transition-colors duration-300">Ride</a>
+        </div>
+        <button id="startBtn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-sm font-medium hover:from-amber-400 hover:to-orange-500 transition-all duration-300 flex items-center gap-2">
+          <span class="iconify" data-icon="mdi:fire"></span>
+          Ignite
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0">
+      <img src="https://picsum.photos/seed/cyclist-road-dawn/1920/1080.jpg" alt="Cyclist" class="w-full h-full object-cover opacity-30 animate-zoom-pulse" />
+      <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-transparent to-[#0a0a0a]"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-transparent to-[#0a0a0a] opacity-60"></div>
+    </div>
+
+    <!-- Decorative Blobs -->
+    <div class="absolute top-1/4 -left-32 w-96 h-96 bg-gradient-to-br from-amber-900/20 to-stone-900/20 rounded-full blur-3xl animate-morph"></div>
+    <div class="absolute bottom-1/4 -right-32 w-80 h-80 bg-gradient-to-br from-orange-900/20 to-stone-900/20 rounded-full blur-3xl animate-morph" style="animation-delay: -5s;"></div>
+
+    <!-- Speed Lines -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden" id="speedLines"></div>
+
+    <!-- Grid Overlay -->
+    <div class="absolute inset-0 grid-pattern opacity-30"></div>
+
+    <!-- Road Lines (bottom center) -->
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 mb-10 opacity-40">
+      <div class="road-line"></div>
+      <div class="road-line" style="animation-delay: 0.1s;"></div>
+      <div class="road-line" style="animation-delay: 0.2s;"></div>
+      <div class="road-line" style="animation-delay: 0.3s;"></div>
+      <div class="road-line" style="animation-delay: 0.4s;"></div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="relative z-10 text-center px-6 max-w-6xl mx-auto" style="animation: fade-up 1.2s cubic-bezier(0.17, 0.55, 0.55, 1) forwards;">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 glass rounded-full px-5 py-2 mb-8">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span class="text-xs font-medium uppercase tracking-[0.3em] text-stone-400">Your Next Ride Starts Now</span>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="hero-title text-6xl md:text-8xl lg:text-9xl font-black mb-6">
+        <span class="block text-gradient-fire">RIDE OR</span>
+        <span class="block text-gradient">NOTHING</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-lg md:text-xl font-light text-stone-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+        The wind doesn't care about your excuses. The road doesn't wait for motivation.
+        <span class="text-stone-200 font-medium">You just ride.</span>
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button id="heroRideBtn" class="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold text-lg overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(245,158,11,0.3)] hover:scale-105">
+          <span class="relative z-10 flex items-center gap-3">
+            <span class="iconify text-2xl" data-icon="mdi:lightning-bolt"></span>
+            Start Riding
+          </span>
+          <div class="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        </button>
+        <button class="px-8 py-4 rounded-2xl glass text-stone-300 font-medium text-lg hover:text-white hover:border-amber-500/30 transition-all duration-500 flex items-center gap-3">
+          <span class="iconify text-xl" data-icon="mdi:play-circle-outline"></span>
+          Watch Film
+        </button>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="mt-16 flex flex-col items-center gap-2 animate-float" style="animation-duration: 3s;">
+        <span class="text-xs uppercase tracking-[0.2em] text-stone-500">Scroll</span>
+        <div class="w-6 h-10 rounded-full border-2 border-stone-700 flex justify-center pt-2">
+          <div class="w-1.5 h-3 bg-amber-500 rounded-full animate-bounce"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vertical text left -->
+    <div class="hidden lg:block absolute left-8 top-1/2 -translate-y-1/2 vertical-text text-xs uppercase tracking-[0.3em] text-stone-700">
+      Pain is temporary • Glory is forever
+    </div>
+
+    <!-- Vertical text right -->
+    <div class="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 vertical-text text-xs uppercase tracking-[0.3em] text-stone-700">
+      No brakes • No limits • No excuses
+    </div>
+  </section>
+
+  <!-- ===== STATS SECTION ===== -->
+  <section id="stats" class="py-32 px-6 relative">
+    <div class="absolute inset-0 grid-pattern opacity-20"></div>
+
+    <!-- Orbit decoration -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-stone-800/30 rounded-full animate-rotate-slow pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-stone-800/20 rounded-full animate-rotate-reverse pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <!-- Section header -->
+      <div class="text-center mb-20 reveal">
+        <span class="text-xs font-medium uppercase tracking-[0.3em] text-amber-500 mb-4 block">The Numbers Don't Lie</span>
+        <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+          Every pedal stroke <span class="text-gradient-warm">counts</span>
+        </h2>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Stat 1 -->
+        <div class="reveal stagger-1 glass rounded-3xl p-8 text-center group hover:border-amber-500/20 transition-all duration-500">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-900/30 to-stone-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-3xl text-amber-500" data-icon="mdi:road-variant"></span>
+          </div>
+          <div class="text-4xl md:text-5xl font-black text-gradient-warm stat-number" data-target="10000" data-suffix="+">0</div>
+          <div class="text-sm text-stone-500 mt-2 uppercase tracking-wider">Km Conquered</div>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="reveal stagger-2 glass rounded-3xl p-8 text-center group hover:border-amber-500/20 transition-all duration-500">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-orange-900/30 to-stone-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-3xl text-orange-500" data-icon="mdi:fire"></span>
+          </div>
+          <div class="text-4xl md:text-5xl font-black text-gradient-fire stat-number" data-target="250000" data-suffix="">0</div>
+          <div class="text-sm text-stone-500 mt-2 uppercase tracking-wider">Calories Burned</div>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="reveal stagger-3 glass rounded-3xl p-8 text-center group hover:border-amber-500/20 transition-all duration-500">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-900/30 to-stone-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-3xl text-amber-500" data-icon="mdi:mountain"></span>
+          </div>
+          <div class="text-4xl md:text-5xl font-black text-gradient-warm stat-number" data-target="48000" data-suffix="m">0</div>
+          <div class="text-sm text-stone-500 mt-2 uppercase tracking-wider">Elevation Gained</div>
+        </div>
+
+        <!-- Stat 4 -->
+        <div class="reveal stagger-4 glass rounded-3xl p-8 text-center group hover:border-amber-500/20 transition-all duration-500">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-orange-900/30 to-stone-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-3xl text-orange-500 animate-heartbeat" data-icon="mdi:heart-pulse"></span>
+          </div>
+          <div class="text-4xl md:text-5xl font-black text-gradient-fire stat-number" data-target="365" data-suffix="">0</div>
+          <div class="text-sm text-stone-500 mt-2 uppercase tracking-wider">Days of Grit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUOTES / FUEL SECTION ===== -->
+  <section id="quotes" class="py-32 px-6 relative">
+    <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-900/10 to-transparent rounded-full blur-3xl animate-breathe"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center mb-20 reveal">
+        <span class="text-xs font-medium uppercase tracking-[0.3em] text-amber-500 mb-4 block">Fuel For Your Soul</span>
+        <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+          When your legs <span class="text-gradient-warm">burn</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Quote 1 -->
+        <div class="reveal stagger-1 quote-card glass rounded-3xl p-8 relative overflow-hidden group">
+          <div class="absolute top-4 right-4 text-7xl font-black text-stone-800/50 leading-none">"</div>
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-2xl text-amber-500" data-icon="mdi:format-quote-close"></span>
+          </div>
+          <p class="text-lg font-light text-stone-300 leading-relaxed mb-6">
+            It never gets easier. You just get <span class="text-amber-400 font-medium">faster</span>.
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-xs font-bold text-white">GL</div>
+            <div>
+              <div class="text-sm font-medium text-stone-200">Greg LeMond</div>
+              <div class="text-xs text-stone-500">3× Tour de France Champion</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quote 2 -->
+        <div class="reveal stagger-2 quote-card glass rounded-3xl p-8 relative overflow-hidden group">
+          <div class="absolute top-4 right-4 text-7xl font-black text-stone-800/50 leading-none">"</div>
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-2xl text-orange-500" data-icon="mdi:lightning-bolt"></span>
+          </div>
+          <p class="text-lg font-light text-stone-300 leading-relaxed mb-6">
+            The bicycle is a curious vehicle. Its passenger is its <span class="text-orange-400 font-medium">engine</span>.
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-xs font-bold text-white">JH</div>
+            <div>
+              <div class="text-sm font-medium text-stone-200">John Howard</div>
+              <div class="text-xs text-stone-500">Olympic Cyclist</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quote 3 -->
+        <div class="reveal stagger-3 quote-card glass rounded-3xl p-8 relative overflow-hidden group">
+          <div class="absolute top-4 right-4 text-7xl font-black text-stone-800/50 leading-none">"</div>
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-2xl text-yellow-500" data-icon="mdi:trophy"></span>
+          </div>
+          <p class="text-lg font-light text-stone-300 leading-relaxed mb-6">
+            When your legs scream, your heart whispers: <span class="text-yellow-400 font-medium">keep going</span>.
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center text-xs font-bold text-white">∞</div>
+            <div>
+              <div class="text-sm font-medium text-stone-200">Every Rider</div>
+              <div class="text-xs text-stone-500">The voice within</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quote 4 -->
+        <div class="reveal stagger-4 quote-card glass rounded-3xl p-8 relative overflow-hidden group">
+          <div class="absolute top-4 right-4 text-7xl font-black text-stone-800/50 leading-none">"</div>
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-stone-500/20 to-stone-700/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+            <span class="iconify text-2xl text-stone-400" data-icon="mdi:weather-windy"></span>
+          </div>
+          <p class="text-lg font-light text-stone-300 leading-relaxed mb-6">
+            You can't buy motivation. But you can <span class="text-stone-100 font-medium">ride through the pain</span> until it becomes your fuel.
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-stone-500 to-stone-700 flex items-center justify-center text-xs font-bold text-white">⚡</div>
+            <div>
+              <div class="text-sm font-medium text-stone-200">Rider's Creed</div>
+              <div class="text-xs text-stone-500">Street wisdom</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quote 5 -->
+        <div class="reveal stagger-5 quote-card glass rounded-3xl p-8 relative overflow-hidden group md:col-span-2 lg:col-span-2">
+          <div class="absolute top-4 right-4 text-7xl font-black text-stone-800/50 leading-none">"</div>
+          <div class="flex flex-col md:flex-row gap-8 items-start">
+            <div class="flex-shrink-0">
+              <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <span class="iconify text-3xl text-amber-500" data-icon="mdi:bike-fast"></span>
+              </div>
+            </div>
+            <div>
+              <p class="text-xl md:text-2xl font-light text-stone-300 leading-relaxed mb-6">
+                A bicycle ride around the world begins with a <span class="text-amber-400 font-medium">single pedal stroke</span>. The hardest part of any epic ride isn't the mountains — it's the first 100 meters out of your driveway.
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-xs font-bold text-white">JK</div>
+                <div>
+                  <div class="text-sm font-medium text-stone-200">Jenny Kidd</div>
+                  <div class="text-xs text-stone-500">Adventure Cyclist</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MANTRA SECTION ===== -->
+  <section id="mantra" class="py-32 px-6 relative overflow-hidden">
+    <!-- Full-width background image -->
+    <div class="absolute inset-0">
+      <img src="https://picsum.photos/seed/mountain-cycling-sunset/1920/1080.jpg" alt="Mountain ride" class="w-full h-full object-cover opacity-20 img-mask" />
+      <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/80 to-[#0a0a0a]"></div>
+    </div>
+
+    <!-- Decorative wheel -->
+    <div class="absolute -right-20 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+      <svg width="500" height="500" viewBox="0 0 500 500" class="wheel-spin-slow">
+        <circle cx="250" cy="250" r="240" fill="none" stroke="#a8a29e" stroke-width="1" />
+        <circle cx="250" cy="250" r="200" fill="none" stroke="#a8a29e" stroke-width="0.5" />
+        <circle cx="250" cy="250" r="160" fill="none" stroke="#a8a29e" stroke-width="0.5" />
+        <circle cx="250" cy="250" r="120" fill="none" stroke="#a8a29e" stroke-width="0.5" />
+        <circle cx="250" cy="250" r="80" fill="none" stroke="#a8a29e" stroke-width="0.5" />
+        <!-- Spokes -->
+        <line x1="250" y1="10" x2="250" y2="490" stroke="#a8a29e" stroke-width="0.5" />
+        <line x1="10" y1="250" x2="490" y2="250" stroke="#a8a29e" stroke-width="0.5" />
+        <line x1="80" y1="80" x2="420" y2="420" stroke="#a8a29e" stroke-width="0.5" />
+        <line x1="420" y1="80" x2="80" y2="420" stroke="#a8a29e" stroke-width="0.5" />
+        <line x1="250" y1="10" x2="250" y2="490" stroke="#a8a29e" stroke-width="0.5" transform="rotate(30 250 250)" />
+        <line x1="250" y1="10" x2="250" y2="490" stroke="#a8a29e" stroke-width="0.5" transform="rotate(60 250 250)" />
+      </svg>
+    </div>
+
+    <div class="max-w-5xl mx-auto relative z-10 text-center">
+      <div class="reveal">
+        <span class="text-xs font-medium uppercase tracking-[0.3em] text-amber-500 mb-8 block">The Rider's Mantra</span>
+      </div>
+
+      <div class="reveal stagger-1 mb-16">
+        <h2 class="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight leading-tight text-gradient-fire">
+          "I don't stop when I'm tired.<br/>
+          I stop when I'm <span class="text-amber-400">done</span>."
+        </h2>
+      </div>
+
+      <div class="reveal stagger-2">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 text-stone-500">
+          <div class="flex items-center gap-3">
+            <span class="iconify text-amber-500 text-xl" data-icon="mdi:weather-windy"></span>
+            <span class="text-sm uppercase tracking-wider">Headwind? Good.</span>
+          </div>
+          <div class="hidden sm:block w-1 h-1 rounded-full bg-stone-700"></div>
+          <div class="flex items-center gap-3">
+            <span class="iconify text-orange-500 text-xl" data-icon="mdi:terrain"></span>
+            <span class="text-sm uppercase tracking-wider">Climb? Better.</span>
+          </div>
+          <div class="hidden sm:block w-1 h-1 rounded-full bg-stone-700"></div>
+          <div class="flex items-center gap-3">
+            <span class="iconify text-yellow-500 text-xl" data-icon="mdi:clock-fast"></span>
+            <span class="text-sm uppercase tracking-wider">Pain? Fuel.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress rings -->
+      <div class="reveal stagger-3 mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+        <div class="text-center">
+          <svg width="100" height="100" viewBox="0 0 100 100" class="mx-auto mb-3">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6" />
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" stroke-width="6" stroke-linecap="round"
+              stroke-dasharray="251" stroke-dashoffset="25" class="progress-ring-circle" />
+            <text x="50" y="54" text-anchor="middle" fill="#f59e0b" font-size="16" font-weight="700">90%</text>
+          </svg>
+          <div class="text-xs text-stone-500 uppercase tracking-wider">Heart</div>
+        </div>
+        <div class="text-center">
+          <svg width="100" height="100" viewBox="0 0 100 100" class="mx-auto mb-3">
+            <circle cx="50" cy="50" r="40"
