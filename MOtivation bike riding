@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPORT BIKE — Animated Clip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#000;color:#f5f5f4;overflow:hidden;height:100vh;width:100vw}
+
+    /* ── Clip Container ── */
+    #clip{position:relative;width:100vw;height:100vh;overflow:hidden}
+
+    /* ── Scenes ── */
+    .scene{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 0.01s}
+    .scene.active{opacity:1;pointer-events:all}
+
+    /* ── Canvas ── */
+    #fx{position:absolute;inset:0;z-index:10;pointer-events:none}
+
+    /* ── Noise ── */
+    #clip::after{
+      content:'';position:absolute;inset:0;z-index:90;pointer-events:none;opacity:0.04;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── Text helpers ── */
+    .fire-text{
+      background:linear-gradient(135deg,#fff 0%,#fcd34d 40%,#f97316 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .amber-text{
+      background:linear-gradient(135deg,#fef3c7 0%,#fcd34d 50%,#f59e0b 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .white-text{
+      background:linear-gradient(135deg,#fff 0%,#e7e5e4 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+
+    /* ── Keyframes ── */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-40px)}}
+    @keyframes scaleIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+    @keyframes scaleOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(2)}}
+    @keyframes slideLeft{from{opacity:0;transform:translateX(120px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes slideRight{from{opacity:0;transform:translateX(-120px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes typeIn{from{width:0}to{width:100%}}
+    @keyframes blink{0%,100%{border-color:transparent}50%{border-color:#f59e0b}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    @keyframes zoomBg{0%{transform:scale(1)}100%{transform:scale(1.3)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}
+    @keyframes wheelSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    @keyframes roadMove{from{transform:translateY(0)}to{transform:translateY(60px)}}
+    @keyframes speedLine{0%{transform:translateX(100vw);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(-100vw);opacity:0}}
+    @keyframes breathe{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:0.7;transform:scale(1.08)}}
+    @keyframes countUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.2)}50%{box-shadow:0 0 60px rgba(245,158,11,0.5),0 0 120px rgba(245,158,11,0.2)}}
+    @keyframes dashDraw{to{stroke-dashoffset:0}}
+    @keyframes revealUp{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+    @keyframes wipeRight{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+    @keyframes glitch{
+      0%,100%{transform:translate(0);filter:none}
+      20%{transform:translate(-3px,2px);filter:hue-rotate(90deg)}
+      40%{transform:translate(3px,-2px);filter:hue-rotate(-90deg)}
+      60%{transform:translate(-2px,-1px);filter:hue-rotate(45deg)}
+      80%{transform:translate(2px,1px);filter:none}
+    }
+    @keyframes breatheBg{0%,100%{transform:scale(1.05)}50%{transform:scale(1.15)}}
+    @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(0.5)}}
+    @keyframes strobe{0%,100%{opacity:0}50%{opacity:0.15}}
+    @keyframes lineExpand{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    @keyframes fadeScale{from{opacity:0;transform:scale(0.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+    /* ── Progress Bar ── */
+    #progressBar{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#f59e0b,#f97316);z-index:80;transition:width 0.1s linear;border-radius:0 2px 2px 0}
+
+    /* ── Controls ── */
+    #controls{
+      position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:80;
+      display:flex;align-items:center;gap:12px;
+      background:rgba(10,10,10,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.06);border-radius:50px;padding:8px 20px;
+      opacity:0;transition:opacity 0.5s ease;
+    }
+    #controls.show{opacity:1}
+    #controls button{background:none;border:none;color:#a8a29e;cursor:pointer;padding:6px;border-radius:50%;transition:all 0.3s ease;display:flex;align-items:center;justify-content:center}
+    #controls button:hover{color:#f59e0b;background:rgba(245,158,11,0.1)}
+    #timeDisplay{font-size:12px;color:#78716c;font-variant-numeric:tabular-nums;min-width:80px;text-align:center}
+
+    /* ── Scene-specific ── */
+    .speed-ln{position:absolute;height:2px;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.6),transparent);animation:speedLine linear infinite}
+    .road-dash{width:4px;height:24px;background:rgba(245,158,11,0.35);border-radius:2px;animation:roadMove 0.4s linear infinite}
+
+    /* ── Bike SVG ── */
+    .wheel-spin{animation:wheelSpin 0.8s linear infinite;transform-origin:center}
+    .wheel-spin-slow{animation:wheelSpin 2s linear infinite;transform-origin:center}
+
+    /* ── Cinematic bars ── */
+    .cine-bar{position:absolute;left:0;right:0;height:10vh;background:#000;z-index:50;pointer-events:none}
+    .cine-bar.top{top:0}.cine-bar.bot{bottom:0}
+
+    /* Replay overlay */
+    #replayOverlay{
+      position:absolute;inset:0;z-index:100;background:rgba(0,0,0,0.85);
+      display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    }
+    #replayOverlay.show{display:flex}
+  </style>
+</head>
+<body>
+  <div id="clip">
+    <canvas id="fx"></canvas>
+
+    <!-- Cinematic Bars -->
+    <div class="cine-bar top"></div>
+    <div class="cine-bar bot"></div>
+
+    <!-- ═══════════ SCENE 1 — BLACK / HEARTBEAT ═══════════ -->
+    <div class="scene active" id="s1" data-duration="4000">
+      <div class="absolute inset-0 bg-black"></div>
+      <div class="absolute inset-0 flex items-center justify-center flex-col gap-6 z-20">
+        <div id="s1Heart" class="text-7xl" style="opacity:0">
+          <span class="iconify text-red-500" data-icon="mdi:heart-pulse" style="filter:drop-shadow(0 0 30px rgba(239,68,68,0.5))"></span>
+        </div>
+        <div id="s1Bpm" class="text-2xl font-black tracking-widest text-red-500" style="opacity:0;font-variant-numeric:tabular-nums">
+          72 BPM
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCENE 2 — TITLE SLAM ═══════════ -->
+    <div class="scene" id="s2" data-duration="3500">
+      <div class="absolute inset-0 bg-black"></div>
+      <!-- Strobe flash -->
+      <div id="s2Flash" class="absolute inset-0 bg-amber-500" style="opacity:0;z-index:15"></div>
+      <div class="absolute inset-0 flex items-center justify-center z-20">
+        <h1 id="s2Title" class="text-7xl md:text-9xl font-black tracking-tighter fire-text" style="opacity:0;transform:scale(2)">
+          RIDE
+        </h1>
+      </div>
+      <!-- Speed lines burst -->
+      <div id="s2Lines" class="absolute inset-0 pointer-events-none z-10"></div>
+    </div>
+
+    <!-- ═══════════ SCENE 3 — BIKE APPEARS ═══════════ -->
+    <div class="scene" id="s3" data-duration="5000">
+      <div class="absolute inset-0">
+        <img src="https://picsum.photos/seed/dark-road-night/1920/1080.jpg" class="w-full h-full object-cover opacity-20" style="animation:breatheBg 8s ease-in-out infinite" />
+        <div class="absolute inset-0 bg-gradient-to-b from-black via-black/60 to-black"></div>
+      </div>
+      <!-- Speed lines -->
+      <div class="absolute inset-0 pointer-events-none" id="s3SpeedLines"></div>
+      <!-- Road dashes -->
+      <div class="absolute bottom-[10vh] left-1/2 -translate-x-1/2 flex flex-col gap-3 opacity-50 z-5">
+        <div class="road-dash"></div><div class="road-dash" style="animation-delay:.08s"></div>
+        <div class="road-dash" style="animation-delay:.16s"></div><div class="road-dash" style="animation-delay:.24s"></div>
+        <div class="road-dash" style="animation-delay:.32s"></div><div class="road-dash" style="animation-delay:.4s"></div>
+      </div>
+      <!-- Bike SVG -->
+      <div class="absolute inset-0 flex items-center justify-center z-20" id="s3BikeWrap" style="opacity:0;transform:translateX(-200px)">
+        <svg viewBox="0 0 400 200" width="500" height="250" fill="none">
+          <!-- Rear wheel -->
+          <g class="wheel-spin" style="transform-origin:110px 140px">
+            <circle cx="110" cy="140" r="50" stroke="#a8a29e" stroke-width="2" opacity="0.5"/>
+            <circle cx="110" cy="140" r="3" fill="#f59e0b"/>
+            <line x1="110" y1="90" x2="110" y2="190" stroke="#78716c" stroke-width="0.5"/>
+            <line x1="60" y1="140" x2="160" y2="140" stroke="#78716c" stroke-width="0.5"/>
+            <line x1="75" y1="105" x2="145" y2="175" stroke="#78716c" stroke-width="0.5"/>
+            <line x1="145" y1="105" x2="75" y2="175" stroke="#78716c" stroke-width="0.5"/>
+          </g>
+          <!-- Front wheel -->
+          <g class="wheel-spin" style="transform-origin:310px 140px">
+            <circle cx="310" cy="140" r="50" stroke="#a8a29e" stroke-width="2" opacity="0.5"/>
+            <circle cx="310" cy="140" r="3" fill="#f59e0b"/>
+            <line x1="310" y1="90" x2="310" y2="190" stroke="#78716c" stroke-width="0.5"/>
+            <line x1="260" y1="140" x2="360" y2="140" stroke="#78716c" stroke-width="0.5"/>
+            <line x1="275" y1="105" x2="345" y2="175" stroke="#78716c" stroke-width="0.5"/>
+            <line x1="345" y1="105" x2="275" y2="175" stroke="#78716c" stroke-width="0.5"/>
+          </g>
+          <!-- Frame -->
+          <path d="M110 140 L180 80 L310 140" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+          <path d="M180 80 L230 80 L310 140" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M110 140 L180 140" stroke="#f97316" stroke-width="2" stroke-linecap="round"/>
+          <!-- Handlebar -->
+          <path d="M230 80 L240 60 L255 58" stroke="#d6d3d1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Seat -->
+          <path d="M170 75 L195 75" stroke="#d6d3d1" stroke-width="4" stroke-linecap="round"/>
+          <!-- Pedal area glow -->
+          <circle cx="180" cy="140" r="8" fill="rgba(245,158,11,0.15)"/>
+          <!-- Rider silhouette (simplified) -->
+          <circle cx="210" cy="55" r="12" fill="rgba(168,162,158,0.3)" stroke="#a8a29e" stroke-width="1"/>
+          <path d="M210 67 L200 95 L220 95 Z" fill="rgba(168,162,158,0.15)" stroke="#78716c" stroke-width="1"/>
+          <path d="M200 82 L240 58" stroke="#78716c" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M220 95 L240 110" stroke="#78716c" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Text -->
+      <div class="absolute bottom-[14vh] left-1/2 -translate-x-1/2 z-20 text-center" id="s3Text" style="opacity:0">
+        <p class="text-lg md:text-2xl font-light text-stone-400 tracking-wide">The machine awakens</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCENE 4 — SPEED BUILD ═══════════ -->
+    <div class="scene" id="s4" data-duration="4500">
+      <div class="absolute inset-0 bg-black"></div>
+      <div class="absolute inset-0 pointer-events-none" id="s4Lines"></div>
+      <!-- Speed counter -->
+      <div class="absolute inset-0 flex items-center justify-center z-20">
+        <div class="text-center">
+          <div id="s4Speed" class="text-8xl md:text-[10rem] font-black fire-text leading-none" style="font-variant-numeric:tabular-nums;opacity:0">
+            0
+          </div>
+          <div id="s4Unit" class="text-2xl md:text-3xl font-light text-stone-500 tracking-[0.5em] mt-4" style="opacity:0">
+            KM/H
+          </div>
+        </div>
+      </div>
+      <!-- Side text -->
+      <div id="s4Side" class="absolute right-8 top-1/2 -translate-y-1/2 z-20 hidden md:block" style="opacity:0">
+        <div class="flex flex-col items-end gap-4 text-right">
+          <div><span class="text-xs text-stone-600 uppercase tracking-widest block">Power</span><span id="s4Power" class="text-2xl font-bold text-amber-500" style="font-variant-numeric:tabular-nums">0W</span></div>
+          <div><span class="text-xs text-stone-600 uppercase tracking-widest block">Cadence</span><span id="s4Cadence" class="text-2xl font-bold text-orange-500" style="font-variant-numeric:tabular-nums">0rpm</span></div>
+          <div><span class="text-xs text-stone-600 uppercase tracking-widest block">Heart Rate</span><span id="s4HR" class="text-2xl font-bold text-red-500" style="font-variant-numeric:tabular-nums">72bpm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCENE 5 — CLIMB / SUFFERING ═══════════ -->
+    <div class="scene" id="s5" data-duration="5500">
+      <div class="absolute inset-0">
+        <img src="https://picsum.photos/seed/mountain-pass-steep/1920/1080.jpg" class="w-full h-full object-cover opacity-25" style="animation:zoomBg 12s ease-in-out infinite alternate" />
+        <div class="absolute inset-0 bg-gradient-to-b from-black via-black/70 to-black"></div>
+      </div>
+      <!-- Gradient overlay pulsing red -->
+      <div id="s5Pulse" class="absolute inset-0 z-5" style="background:radial-gradient(ellipse at center,transparent 40%,rgba(220,38,38,0.15) 100%);opacity:0"></div>
+      <!-- Mountain icon -->
+      <div class="absolute inset-0 flex items-center justify-center z-20">
+        <div id="s5Icon" style="opacity:0">
+          <span class="iconify text-8xl text-stone-700" data-icon="mdi:terrain" style="filter:drop-shadow(0 0 40px rgba(168,162,158,0.2))"></span>
+        </div>
+      </div>
+      <!-- Text sequence -->
+      <div class="absolute bottom-[14vh] left-1/2 -translate-x-1/2 z-20 text-center">
+        <p id="s5T1" class="text-3xl md:text-5xl font-bold white-text mb-4" style="opacity:0">The climb begins.</p>
+        <p id="s5T2" class="text-2xl md:text-4xl font-light text-stone-400 mb-4" style="opacity:0">Your lungs burn.</p>
+        <p id="s5T3" class="text-3xl md:text-5xl font-black fire-text" style="opacity:0">GOOD.</p>
+      </div>
+      <!-- Elevation counter -->
+      <div class="absolute left-8 top-1/2 -translate-y-1/2 z-20 hidden md:block" id="s5Elev" style="opacity:0">
+        <span class="text-xs text-stone-600 uppercase tracking-widest block mb-2">Elevation</span>
+        <span id="s5ElevNum" class="text-4xl font-black text-amber-500" style="font-variant-numeric:tabular-nums">0m</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCENE 6 — DESCENT / FLOW ═══════════ -->
+    <div class="scene" id="s6" data-duration="4500">
+      <div class="absolute inset-0 bg-black"></div>
+      <div class="absolute inset-0 pointer-events-none" id="s6Lines"></div>
+      <!-- Massive speed lines -->
+      <div class="absolute inset-0 pointer-events-none" id="s6FastLines"></div>
+      <!-- Flowing text -->
+      <div class="absolute inset-0 flex items-center justify-center z-20">
+        <div class="text-center">
+          <p id="s6T1" class="text-5xl md:text-7xl font-black white-text mb-6" style="opacity:0;transform:translateY(40px)">THEN YOU</p>
+          <p id="s6T2" class="text-6xl md:text-8xl font-black fire-text" style="opacity:0;transform:scale(0.5)">FLY.</p>
+        </div>
+      </div>
+      <!-- Wind streaks SVG -->
+      <svg class="absolute inset-0 w-full h-full z-10" id="s6Wind" style="opacity:0">
+        <line x1="-100" y1="30%" x2="200" y2="30%" stroke="rgba(245,158,11,0.15)" stroke-width="2">
+          <animate attributeName="x1" from="-200" to="110%" dur="1s" repeatCount="indefinite"/>
+          <animate attributeName="x2" from="0" to="120%" dur="1s" repeatCount="indefinite"/>
+        </line>
+        <line x1="-100" y1="50%" x2="200" y2="50%" stroke="rgba(245,158,11,0.1)" stroke-width="3">
+          <animate attributeName="x1" from="-200" to="110%" dur="0.7s" repeatCount="indefinite"/>
+          <animate attributeName="x2" from="0" to="120%" dur="0.7s" repeatCount="indefinite"/>
+        </line>
+        <line x1="-100" y1="70%" x2="200" y2="70%" stroke="rgba(245,158,11,0.12)" stroke-width="1.5">
+          <animate attributeName="x1" from="-200" to="110%" dur="1.2s" repeatCount="indefinite"/>
+          <animate attributeName="x2" from="0" to="120%" dur="1.2s" repeatCount="indefinite"/>
+        </line>
+      </svg>
+    </div>
+
+    <!-- ═══════════ SCENE 7 — QUOTE ═══════════ -->
+    <div class="scene" id="s7" data-duration="5000">
+      <div class="absolute inset-0">
+        <img src="https://picsum.photos/seed/golden-hour-road/1920/1080.jpg" class="w-full h-full object-cover opacity-15" style="animation:breatheBg 10s ease-in-out infinite alternate" />
+        <div class="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black"></div>
+      </div>
+      <div class="absolute inset-0 flex items-center justify-center z-20 px-8">
+        <div class="text-center max-w-3xl">
+          <div id="s7Quote" class="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] tracking-tight" style="opacity:0">
+            <span class="fire-text">"It never</span><br/>
+            <span class="white-text">gets easier.</span><br/>
+            <span class="amber-text">You just get</span><br/>
+            <span class="fire-text" style="font-size:1.2em">FASTER."</span>
+          </div>
+          <div id="s7Attr" class="mt-8 flex items-center justify-center gap-3" style="opacity:0">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-xs font-bold text-white">GL</div>
+            <span class="text-sm text-stone-500">Greg LeMond</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCENE 8 — MANTRA ═══════════ -->
+    <div class="scene" id="s8" data-duration="4000">
+      <div class="absolute inset-0 bg-black"></div>
+      <div class="absolute inset-0 flex items-center justify-center z-20 flex-col gap-8 px-8">
+        <p id="s8L1" class="text-2xl md:text-4xl font-bold text-stone-500 tracking-wide" style="opacity:0">Headwind?</p>
+        <p id="s8L2" class="text-4xl md:text-6xl font-black amber-text" style="opacity:0">GOOD.</p>
+        <p id="s8L3" class="text-2xl md:text-4xl font-bold text-stone-500 tracking-wide" style="opacity:0">Climb?</p>
+        <p id="s8L4" class="text-4xl md:text-6xl font-black fire-text" style="opacity:0">BETTER.</p>
+        <p id="s8L5" class="text-2xl md:text-4xl font-bold text-stone-500 tracking-wide" style="opacity:0">Pain?</p>
+        <p id="s8L6" class="text-5xl md:text-7xl font-black fire-text" style="opacity:0;animation:glowPulse 2s ease-in-out infinite">FUEL.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ SCENE 9 — FINALE ═══════════ -->
+    <div class="scene" id="s9" data-duration="5000">
+      <div class="absolute inset-0 bg-black"></div>
+      <div class="absolute inset-0 pointer-events-none" id="s9Lines"></div>
+      <!-- Glow -->
+      <div id="s9Glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full z-5" style="background:radial-gradient(circle,rgba(245,158,11,0.15) 0%,transparent 70%);opacity:0"></div>
+      <div class="absolute inset-0 flex items-center justify-center z-20 flex-col gap-6">
+        <div id="s9Bike" style="opacity:0;transform:scale(0.5)">
+          <span class="iconify text-8xl md:text-9xl text-amber-500" data-icon="mdi:bike-fast" style="filter:drop-shadow(0 0 60px rgba(245,158,11,0.4))"></span>
+        </div>
+        <h2 id="s9Title" class="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter fire-text" style="opacity:0">
+          RIDE OR<br/>NOTHING
+        </h2>
+        <p id="s9Sub" class="text-lg md:text-xl font-light text-stone-500 tracking-wide" style="opacity:0">Now go. Your bike is waiting.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ PROGRESS BAR ═══════════ -->
+    <div id="progressBar" style="width:0%"></div>
+
+    <!-- ═══════════ CONTROLS ═══════════ -->
+    <div id="controls">
+      <button id="btnRestart" title="Restart"><span class="iconify text-lg" data-icon="mdi:restart"></span></button>
+      <button id="btnPlay" title="Play/Pause"><span class="iconify text-lg" data-icon="mdi:pause"></span></button>
+      <span id="timeDisplay">0:00 / 0:00</span>
+      <button id="btnFullscreen" title="Fullscreen"><span class="iconify text-lg" data-icon="mdi:fullscreen"></span></button>
+    </div>
+
+    <!-- ═══════════ REPLAY OVERLAY ═══════════ -->
+    <div id="replayOverlay">
+      <span class="iconify text-6xl text-amber-500 mb-4" data-icon="mdi:bike-fast" style="filter:drop-shadow(0 0 40px rgba(245,158,11,0.4))"></span>
+      <p class="text-3xl md:text-5xl font-black fire-text mb-2">RIDE OR NOTHING</p>
+      <p class="text-stone-500 mb-8">The clip has ended.</p>
+      <button id="btnReplay" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-lg hover:scale-105 hover:shadow-[0_0_40px_rgba(245,158,11,0.3)] transition-all duration-300 flex items-center gap-3">
+        <span class="iconify text-2xl" data-icon="mdi:restart"></span>
+        Replay
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* ════════════════════════════════════════
+       CANVAS — Particle FX
+       ════════════════════════════════════════ */
+    const canvas = document.getElementById('fx');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+    resize();
+    addEventListener('resize', resize);
+
+    class P {
+      constructor(x, y, burst = false) {
+        this.x = x ?? Math.random() * canvas.width;
+        this.y = y ?? Math.random() * canvas.height;
+        this.s = burst ? 1 + Math.random() * 3 : 0.5 + Math.random() * 1.2;
+        this.vx = burst ? (Math.random() - 0.5) * 6 : (Math.random() - 0.5) * 0.2;
+        this.vy = burst ? -Math.random() * 6 - 1 : -Math.random() * 0.3;
+        this.life = 1;
+        this.d = burst ? 0.015 + Math.random() * 0.03 : 0.002 + Math.random() * 0.003;
+        const g = Math.floor(120 + Math.random() * 80);
+        const b = Math.floor(Math.random() * 40);
+        this.c = burst ? `rgba(245,${g},${b},` : `rgba(245,158,11,`;
+      }
+      update() { this.x += this.vx; this.y += this.vy; this.life -= this.d; }
+      draw() {
+        if (this.life <= 0) return;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2);
+        ctx.fillStyle = this.c + (this.life * 0.7) + ')';
+        ctx.fill();
+        if (this.s > 1.5) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.s * 3, 0, Math.PI * 2);
+          ctx.fillStyle = this.c + (this.life * 0.1) + ')';
+          ctx.fill();
+        }
+      }
+    }
+
+    function burst(x, y, n = 25) { for (let i = 0; i < n; i++) particles.push(new P(x, y, true)); }
+
+    function tick() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.life > 0);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    /* ════════════════════════════════════════
+       SPEED LINE GENERATOR
+       ════════════════════════════════════════ */
+    function spawnSpeedLines(container, count = 8, duration = 2) {
+      for (let i = 0; i < count; i++) {
+        const ln = document.createElement('div');
+        ln.classList.add('speed-ln');
+        const top = Math.random() * 100;
+        const w = 60 + Math.random() * 250;
+        const d = duration + Math.random() * 2;
+        const del = Math.random() * 3;
+        ln.style.cssText = `top:${top}%;width:${w}px;animation-duration:${d}s;animation-delay:${del}s;`;
+        container.appendChild(ln);
+        setTimeout(() => ln.remove(), (d + del) * 1000);
+      }
+    }
+
+    /* ════════════════════════════════════════
+       SCENE TIMELINE ENGINE
+       ════════════════════════════════════════ */
+    const scenes = [
+      { id: 's1', dur: 4000 },
+      { id: 's2', dur: 3500 },
+      { id: 's3', dur: 5000 },
+      { id: 's4', dur: 4500 },
+      { id: 's5', dur: 5500 },
+      { id: 's6', dur: 4500 },
+      { id: 's7', dur: 5000 },
+      { id: 's8', dur: 4000 },
+      { id: 's9', dur: 5000 },
+    ];
+    const totalDur = scenes.reduce((a, s) => a + s.dur, 0);
+
+    let currentScene = -1;
+    let sceneStart = 0;
+    let clipStart = 0;
+    let playing = true;
+    let pausedAt = 0;
+    let speedLineIntervals = [];
+
+    const bar = document.getElementById('progressBar');
+    const timeDisp = document.getElementById('timeDisplay');
+    const controls = document.getElementById('controls');
+    const replayOvl = document.getElementById('replayOverlay');
+
+    function formatTime(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = Math.floor(s / 60);
+      const ss = s % 60;
+      return `${m}:${ss.toString().padStart(2, '0')}`;
+    }
+
+    function showControls() { controls.classList.add('show'); setTimeout(() => controls.classList.remove('show'), 4000); }
+    document.addEventListener('mousemove', showControls);
+    document.addEventListener('click', showControls);
+
+    /* ── Scene-specific animations ── */
+    function animateScene(idx) {
+      const el = document.getElementById(scenes[idx].id);
+
+      // Clear old speed line intervals
+      speedLineIntervals.forEach(clearInterval);
+      speedLineIntervals = [];
+
+      switch (scenes[idx].id) {
+
+        case 's1': {
+          const heart = document.getElementById('s1Heart');
+          const bpm = document.getElementById('s1Bpm');
+          heart.style.opacity = '1';
+          heart.style.animation = 'none';
+          heart.offsetHeight;
+          heart.style.animation = 'pulse 1s ease-in-out infinite';
+          bpm.style.opacity = '1';
+          bpm.textContent = '72 BPM';
+          setTimeout(() => { bpm.textContent = '78 BPM'; }, 800);
+          setTimeout(() => { bpm.textContent = '85 BPM'; }, 1600);
+          setTimeout(() => { bpm.textContent = '92 BPM'; }, 2400);
+          setTimeout(() => { bpm.style.transition = 'all 0.3s'; bpm.style.color = '#f59e0b'; bpm.textContent = '110 BPM'; }, 3200);
+          break;
+        }
+
+        case 's2': {
+          const flash = document.getElementById('s2Flash');
+          const title = document.getElementById('s2Title');
+          const lines = document.getElementById('s2Lines');
+          // Flash
+          flash.style.transition = 'none'; flash.style.opacity = '0';
+          flash.offsetHeight;
+          flash.style.transition = 'opacity 0.1s'; flash.style.opacity = '0.8';
+          setTimeout(() => { flash.style.transition = 'opacity 0.5s'; flash.style.opacity = '0'; }, 150);
+          // Title slam
+          title.style.opacity = '0'; title.style.transform = 'scale(2)';
+          title.offsetHeight;
+          title.style.transition = 'all 0.4s cubic-bezier(0.17,0.55,0.55,1)';
+          title.style.opacity = '1'; title.style.transform = 'scale(1)';
+          // Glitch
+          setTimeout(() => { title.style.animation = 'glitch 0.3s ease'; }, 500);
+          setTimeout(() => { title.style.animation = 'none'; }, 800);
+          // Speed lines
+          spawnSpeedLines(lines, 20, 1.5);
+          burst(canvas.width / 2, canvas.height / 2, 40);
+          break;
+        }
+
+        case 's3': {
+          const bike = document.getElementById('s3BikeWrap');
+          const text = document.getElementById('s3Text');
+          const sl = document.getElementById('s3SpeedLines');
+          bike.style.transition = 'none'; bike.style.opacity = '0'; bike.style.transform = 'translateX(-200px)';
+          text.style.transition = 'none'; text.style.opacity = '0';
+          bike.offsetHeight;
+          bike.style.transition = 'all 1.2s cubic-bezier(0.17,0.55,0.55,1)';
+          bike.style.opacity = '1'; bike.style.transform = 'translateX(0)';
+          setTimeout(() => {
+            text.style.transition = 'all 0.8s ease';
+            text.style.opacity = '1';
+          }, 1000);
+          const iv = setInterval(() => spawnSpeedLines(sl, 3, 2), 400);
+          speedLineIntervals.push(iv);
+          burst(canvas.width * 0.4, canvas.height * 0.5, 15);
+          break;
+        }
+
+        case 's4': {
+          const speed = document.getElementById('s4Speed');
+          const unit = document.getElementById('s4Unit');
+          const side = document.getElementById('s4Side');
+          const sl = document.getElementById('s4Lines');
+          speed.style.opacity = '1'; speed.style.transition = 'none';
+          unit.style.opacity = '1';
+          side.style.opacity = '1'; side.style.transition = 'opacity 0.5s';
+          const target = 87;
+          const dur = 3000;
+          const start = performance.now();
+          function tick(now) {
+            const p = Math.min((now - start) / dur, 1);
+            const ease = 1 - Math.pow(1 - p, 3);
+            const v = Math.floor(ease * target);
+            speed.textContent = v;
+            document.getElementById('s4Power').textContent = Math.floor(ease * 320) + 'W';
+            document.getElementById('s4Cadence').textContent = Math.floor(ease * 105) + 'rpm';
+            document.getElementById('s4HR').textContent = Math.floor(72 + ease * 58) + 'bpm';
+            if (p < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+          // Shake at peak
+          setTimeout(() => { speed.style.animation = 'shake 0.5s ease'; }, 2800);
+          setTimeout(() => { speed.style.animation = 'none'; }, 3300);
+          const iv = setInterval(() => spawnSpeedLines(sl, 4, 1), 300);
+          speedLineIntervals.push(iv);
+          break;
+        }
+
+        case 's5': {
+          const pulse = document.getElementById('s5Pulse');
+          const icon = document.getElementById('s5Icon');
+          const t1 = document.getElementById('s5T1');
+          const t2 = document.getElementById('s5T2');
+          const t3 = document.getElementById('s5T3');
+          const elev = document.getElementById('s5Elev');
+          // Reset
+          [t1, t2, t3].forEach(t => { t.style.transition = 'none'; t.style.opacity = '0'; t.style.transform = 'none'; });
+          icon.style.transition = 'none'; icon.style.opacity = '0';
+          pulse.style.opacity = '0';
+          elev.style.opacity = '0';
+          // Sequence
+          icon.style.transition = 'all 0.8s ease'; icon.style.opacity = '0.4';
+          setTimeout(() => { t1.style.transition = 'all 0.7s ease'; t1.style.opacity = '1'; }, 600);
+          setTimeout(() => {
+            pulse.style.transition = 'opacity 0.5s'; pulse.style.opacity = '1';
+            pulse.style.animation = 'breathe 1.5s ease-in-out infinite';
+          }, 1000);
+          setTimeout(() => { t1.style.transition = 'all 0.5s'; t1.style.opacity = '0'; }, 1500);
+          setTimeout(() => { t2.style.transition = 'all 0.7s ease'; t2.style.opacity = '1'; }, 1700);
+          setTimeout(() => { t2.style.transition = 'all 0.5s'; t2.style.opacity = '0'; }, 2700);
+          setTimeout(() => {
+            t3.style.transition = 'all 0.5s cubic-bezier(0.17,0.55,0.55,1)';
+            t3.style.opacity = '1'; t3.style.transform = 'scale(1.2)';
+            burst(canvas.width / 2, canvas.height * 0.7, 30);
+          }, 3000);
+          setTimeout(() => { t3.style.transform = 'scale(1)'; }, 3500);
+          // Elevation counter
+          elev.style.transition = 'opacity 0.5s'; elev.style.opacity = '1';
+          const eStart = performance.now();
+          function eTick(now) {
+            const p = Math.min((now - eStart) / 4000, 1);
+            document.getElementById('s5ElevNum').textContent = Math.floor(p * 1247) + 'm';
+            if (p < 1) requestAnimationFrame(eTick);
+          }
+          requestAnimationFrame(eTick);
+          break;
+        }
+
+        case 's6': {
+          const t1 = document.getElementById('s6T1');
+          const t2 = document.getElementById('s6T2');
+          const wind = document.getElementById('s6Wind');
+          const fl = document.getElementById('s6FastLines');
+          t1.style.transition = 'none'; t1.style.opacity = '0'; t1.style.transform = 'translateY(40px)';
+          t2.style.transition = 'none'; t2.style.opacity = '0'; t2.style.transform = 'scale(0.5)';
+          wind.style.opacity = '0';
+          t1.offsetHeight;
+          t1.style.transition = 'all 0.8s cubic-bezier(0.17,0.55,0.55,1)';
+          t1.style.opacity = '1'; t1.style.transform = 'translateY(0)';
+          setTimeout(() => {
+            wind.style.transition = 'opacity 0.3s'; wind.style.opacity = '1';
+          }, 800);
+          setTimeout(() => {
+            t1.style.transition = 'all 0.4s'; t1.style.opacity = '0'; t1.style.transform = 'translateY(-20px)';
+          }, 1600);
+          setTimeout(() => {
+            t2.style.transition = 'all 0.6s cubic-bezier(0.17,0.55,0.55,1)';
+            t2.style.opacity = '1'; t2.style.transform = 'scale(1)';
+            burst(canvas.width / 2, canvas.height / 2, 50);
+          }, 2000);
+          // Flash
+          const flash = document.createElement('div');
+          flash.style.cssText = 'position:absolute;inset:0;background:rgba(245,158,11,0.2);z-index:15;opacity:0;transition:opacity 0.1s';
+          document.getElementById('s6').appendChild(flash);
+          setTimeout(() => { flash.style.opacity = '1'; }, 2100);
+          setTimeout(() => { flash.style.transition = 'opacity 0.5s'; flash.style.opacity = '0'; }, 2200);
+          setTimeout(() => flash.remove(), 3000);
+          const iv = setInterval(() => spawnSpeedLines(fl, 6, 0.8), 200);
+          speedLineIntervals.push(iv);
+          break;
+        }
+
+        case 's7': {
+          const q = document.getElementById('s7Quote');
+          const a = document.getElementById('s7Attr');
+          q.style.transition = 'none'; q.style.opacity = '0'; q.style.transform = 'translateY(30px)';
+          a.style.transition = 'none'; a.style.opacity = '0';
+          q.offsetHeight;
+          q.style.transition = 'all 1.2s cubic-bezier(0.17,0.55,0.55,1)';
+          q.style.opacity = '1'; q.style.transform = 'translateY(0)';
+          setTimeout(() => {
+            a.style.transition = 'all 0.8s ease';
+            a.style.opacity = '1';
+          }, 1500);
+          break;
+        }
+
+        case 's8': {
+          const lines = ['s8L1','s8L2','s8L3','s8L4','s8L5','s8L6'];
+          lines.forEach(l => { const e = document.getElementById(l); e.style.transition = 'none'; e.style.opacity = '0'; e.style.transform = 'none'; });
+          lines.forEach((l, i) => {
+            setTimeout(() => {
+              const e = document.getElementById(l);
+              e.style.transition = 'all 0.5s cubic-bezier(0.17,0.55,0.55,1)';
+              e.style.opacity = '1';
+              e.style.transform = 'scale(1.05)';
+              if (i % 2 === 1) burst(canvas.width / 2, canvas.height * 0.3 + i * 60, 12);
+              setTimeout(() => { e.style.transform = 'scale(1)'; }, 300);
+            }, i * 550);
+          });
+          break;
+        }
+
+        case 's9': {
+          const bike = document.getElementById('s9Bike');
+          const title = document.getElementById('s9Title');
+          const sub = document.getElementById('s9Sub');
+          const glow = document.getElementById('s9Glow');
+          const sl = document.getElementById('s9Lines');
+          bike.style.transition = 'none'; bike.style.opacity = '0'; bike.style.transform = 'scale(0.5)';
+          title.style.transition = 'none'; title.style.opacity = '0';
+          sub.style.transition = 'none'; sub.style.opacity = '0';
+          glow.style.opacity = '0';
+          bike.offsetHeight;
+          glow.style.transition = 'opacity 1s'; glow.style.opacity = '1'; glow.style.animation = 'breathe 3s ease-in-out infinite';
+          bike.style.transition = 'all 0.8s cubic-bezier(0.17,0.55,0.55,1)';
+          bike.style.opacity = '1'; bike.style.transform = 'scale(1)';
+          bike.style.animation = 'glowPulse 2s ease-in-out infinite';
+          setTimeout(() => {
+            title.style.transition = 'all 1s cubic-bezier(0.17,0.55,0.55,1)';
+            title.style.opacity = '1';
+            burst(canvas.width / 2, canvas.height / 2, 30);
+          }, 800);
+          setTimeout(() => {
+            sub.style.transition = 'all 0.8s ease';
+            sub.style.opacity = '1';
+          }, 1800);
+          const iv = setInterval(() => spawnSpeedLines(sl, 2, 2.5), 500);
+          speedLineIntervals.push(iv);
+          break;
+        }
+      }
+    }
+
+    /* ── Main loop ── */
+    let rafId;
+    function loop(timestamp) {
+      if (!playing) return;
+      if (!clipStart) clipStart = timestamp - pausedAt;
+
+      const elapsed = timestamp - clipStart;
+      const progress = Math.min(elapsed / totalDur, 1);
+      bar.style.width = (progress * 100) + '%';
+      timeDisp.textContent = `${formatTime(elapsed)} / ${formatTime(totalDur)}`;
+
+      // Determine active scene
+      let accumulated = 0;
+      let targetScene = 0;
+      for (let i = 0; i < scenes.length; i++) {
+        accumulated += scenes[i].dur;
+        if (elapsed < accumulated) { targetScene = i; break; }
+        if (i === scenes.length - 1) targetScene = i;
+      }
+
+      if (targetScene !== currentScene) {
+        // Deactivate old
+        if (currentScene >= 0) document.getElementById(scenes[currentScene].id).classList.remove('active');
+        currentScene = targetScene;
+        sceneStart = timestamp;
+        document.getElementById(scenes[currentScene].id).classList.add('active');
+        animateScene(currentScene);
+      }
+
+      if (progress >= 1) {
+        playing = false;
+        replayOvl.classList.add('show');
+        return;
+      }
+
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function startClip() {
+      replayOvl.classList.remove('show');
+      scenes.forEach(s => document.getElementById(s.id).classList.remove('active'));
+      currentScene = -1;
+      clipStart = 0;
+      pausedAt = 0;
+      playing = true;
+      bar.style.width = '0%';
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function togglePause() {
+      const btn = document.getElementById('btnPlay');
+      if (playing) {
+        playing = false;
+        pausedAt = performance.now() - clipStart;
+        cancelAnimationFrame(rafId);
+        btn.innerHTML = '<span class="iconify text-lg" data-icon="mdi:play"></span>';
+      } else {
+        playing = true;
+        btn.innerHTML = '<span class="iconify text-lg" data-icon="mdi:pause"></span>';
+        rafId = requestAnimationFrame(loop);
+      }
+    }
+
+    /* ── Controls ── */
+    document.getElementById('btnPlay').addEventListener('click', (e) => { e.stopPropagation(); togglePause(); });
+    document.getElementById('btnRestart').addEventListener('click', (e) => { e.stopPropagation(); startClip(); });
+    document.getElementById('btnReplay').addEventListener('click', startClip);
+    document.getElementById('btnFullscreen').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else document.exitFullscreen();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+      if (e.code === 'KeyR') startClip();
+      if (e.code === 'KeyF') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+        else document.exitFullscreen();
+      }
+    });
+
+    /* ── Progress bar seek ── */
+    bar.style.pointerEvents = 'auto'; bar.style.cursor = 'pointer'; bar.style.height = '6px'; bar.style.zIndex = '85';
+    bar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rect = bar.parentElement.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      const seekTo = pct * totalDur;
+      pausedAt = seekTo;
+      clipStart = 0;
+      scenes.forEach(s => document.getElementById(s.id).classList.remove('active'));
+      currentScene = -1;
+      speedLineIntervals.forEach(clearInterval);
+      speedLineIntervals = [];
+      if (!playing) {
+        playing = true;
+        document.getElementById('btnPlay').innerHTML = '<span class="iconify text-lg" data-icon="mdi:pause"></span>';
+      }
+      rafId = requestAnimationFrame(loop);
+    });
+
+    /* ── Start ── */
+    startClip();
+  </script>
+</body>
+</html>
